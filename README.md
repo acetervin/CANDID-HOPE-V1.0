@@ -1,16 +1,51 @@
-# React + Vite
+# Welcome to the Candid Hope project
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+## Project info
 
-Currently, two official plugins are available:
+This repository contains the frontend for Candid Hope — a platform empowering youth and caregivers in Nairobi.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## How can I edit this code?
 
-## React Compiler
+### Run locally
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+Make sure you have Node.js and npm installed.
 
-## Expanding the ESLint configuration
+```sh
+# Clone the repository
+git clone <YOUR_GIT_URL>
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+# Enter the project directory
+cd "Candid hope"
+
+# Install dependencies
+npm install
+
+# Start the dev server
+npm run dev
+```
+
+Then open the URL shown in your terminal (usually http://localhost:5173).
+
+### Edit in your preferred IDE
+
+Open this folder in your editor, make changes, and commit/push as normal.
+
+### Edit in GitHub
+
+You can also edit files directly in GitHub by navigating to the file and clicking the "Edit" (pencil) button.
+
+## What technologies are used for this project?
+
+This project is built with:
+
+- Vite
+- TypeScript
+- React
+- shadcn-ui
+- Tailwind CSS
+
+## How can I deploy this project?
+
+Deploy it to your hosting provider of choice (Vercel, Netlify, etc.) by pointing to this repository.
+
+If you're using Vercel, simply connect the repo, and it will handle builds and deployments automatically.
