@@ -110,11 +110,26 @@ const Footer = () => {
           </div>
         </div>
 
-        <div className="border-t border-primary-foreground/10 pt-8 flex flex-col md:flex-row justify-between items-center gap-4 text-sm text-text-on-dark/60">
-          <p>© 2025 Candid Hope. All rights reserved.</p>
-          <a href="http://www.candidhope.org/" target="_blank" rel="noopener noreferrer" className="hover:text-secondary transition-colors">
-            www.candidhope.org
-          </a>
+        <div className="border-t border-primary-foreground/10 pt-8 flex flex-col md:flex-row justify-between items-center gap-6 text-sm">
+          <div className="flex flex-col items-center md:items-start gap-2">
+            <p className="text-text-on-dark/60">© 2026 Candid Hope. All rights reserved.</p>
+            <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary-foreground/5 border border-primary-foreground/10 group hover:border-secondary/30 transition-all duration-300">
+              <span className="text-[10px]  tracking-widest text-text-on-dark/40 font-bold">Managed and Dev by</span>
+              <div className="h-3 w-[1px] bg-primary-foreground/10" />
+              <a 
+                href="#" 
+                className="flex items-center gap-1.5 hover:opacity-80 transition-opacity"
+              >
+                <span className="text-text-on-dark font-medium text-xs">Kevin Kamau</span>
+                <span className="text-secondary font-bold text-xs tracking-tight italic">CodeNova</span>
+              </a>
+            </div>
+          </div>
+          <div className="flex items-center gap-6">
+            <a href="http://www.candidhope.org/" target="_blank" rel="noopener noreferrer" className="text-text-on-dark/60 hover:text-secondary transition-colors underline underline-offset-4 decoration-primary-foreground/20 hover:decoration-secondary/40">
+              www.candidhope.org
+            </a>
+          </div>
         </div>
       </div>
     </footer>

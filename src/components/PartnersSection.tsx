@@ -11,8 +11,8 @@ const partners = [
   { name: "AMREF Health", logo: "https://images.pexels.com/photos/8613089/pexels-photo-8613089.jpeg?auto=compress&cs=tinysrgb&w=200" },
 ];
 
-// Duplicate for seamless loop
-const marqueePartners = [...partners, ...partners];
+// Triple for seamless loop
+const marqueePartners = [...partners, ...partners, ...partners];
 
 const PartnersSection = () => {
   return (
@@ -34,39 +34,41 @@ const PartnersSection = () => {
 
       <div className="relative w-full">
         {/* Fade edges */}
-        <div className="absolute left-0 top-0 bottom-0 w-24 bg-gradient-to-r from-background to-transparent z-10 pointer-events-none" />
-        <div className="absolute right-0 top-0 bottom-0 w-24 bg-gradient-to-l from-background to-transparent z-10 pointer-events-none" />
+        <div className="absolute left-0 top-0 bottom-0 w-32 bg-gradient-to-r from-background via-background/80 to-transparent z-10 pointer-events-none" />
+        <div className="absolute right-0 top-0 bottom-0 w-32 bg-gradient-to-l from-background via-background/80 to-transparent z-10 pointer-events-none" />
 
-        <motion.div
-          className="flex gap-12 items-center w-max"
-          animate={{ x: ["0%", "-50%"] }}
-          transition={{
-            x: {
-              repeat: Infinity,
-              repeatType: "loop",
-              duration: 30,
-              ease: "linear",
-            },
-          }}
-        >
-          {marqueePartners.map((partner, i) => (
-            <div
-              key={`${partner.name}-${i}`}
-              className="flex flex-col items-center gap-3 group shrink-0"
-            >
-              <div className="w-20 h-20 rounded-full overflow-hidden bg-muted border-2 border-border group-hover:border-secondary transition-colors shadow-sm">
-                <img
-                  src={partner.logo}
-                  alt={partner.name}
-                  className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-300"
-                />
+        <div className="flex overflow-hidden">
+          <motion.div
+            className="flex gap-12 items-center w-max py-4"
+            animate={{ x: ["0%", "-33.33%"] }}
+            transition={{
+              x: {
+                repeat: Infinity,
+                repeatType: "loop",
+                duration: 40,
+                ease: "linear",
+              },
+            }}
+          >
+            {marqueePartners.map((partner, i) => (
+              <div
+                key={`${partner.name}-${i}`}
+                className="flex flex-col items-center gap-3 group shrink-0"
+              >
+                <div className="w-24 h-24 rounded-2xl overflow-hidden bg-card border border-border group-hover:border-secondary group-hover:shadow-lg group-hover:shadow-secondary/10 transition-all duration-500 p-4">
+                  <img
+                    src={partner.logo}
+                    alt={partner.name}
+                    className="w-full h-full object-contain grayscale group-hover:grayscale-0 transition-all duration-500 transform group-hover:scale-110"
+                  />
+                </div>
+                <span className="text-xs text-muted-foreground font-semibold tracking-wide uppercase group-hover:text-foreground transition-colors whitespace-nowrap">
+                  {partner.name}
+                </span>
               </div>
-              <span className="text-sm text-muted-foreground font-medium group-hover:text-foreground transition-colors whitespace-nowrap">
-                {partner.name}
-              </span>
-            </div>
-          ))}
-        </motion.div>
+            ))}
+          </motion.div>
+        </div>
       </div>
     </section>
   );
