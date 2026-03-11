@@ -91,7 +91,7 @@ Deno.serve(async (req) => {
               },
               body: JSON.stringify({
                 to: [{ email: donation.donor_email, name: donation.donor_name }],
-                templateId: 7,
+                templateId: 2,
                 params: {
                   donor_name: donation.donor_name,
                   cause_name: cause.title,
