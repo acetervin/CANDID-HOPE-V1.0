@@ -3,20 +3,22 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Heart, Phone, Loader2, CheckCircle2, XCircle } from "lucide-react";
+import { Heart, Phone, Loader2, CheckCircle2, XCircle, ChevronRight, Coins } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
+import { motion, AnimatePresence } from "framer-motion";
 
 const suggestedAmounts = [
-  { amount: 500, label: "School supplies for one child" },
+  { amount: 500, label: "School supplies" },
   { amount: 1000, label: "Meals for a family" },
   { amount: 2500, label: "Medical support" },
-  { amount: 5000, label: "Sponsor education support" },
+  { amount: 5000, label: "Sponsor education" },
   { amount: 10000, label: "Fund a workshop" },
-  { amount: 25000, label: "Transform a community" },
+  { amount: 25000, label: "Transform community" },
 ];
 
 type PaymentState = "form" | "processing" | "success" | "failed";
+type AmountMode = "suggested" | "custom";
 
 interface DonationDialogProps {
   open: boolean;
@@ -26,6 +28,7 @@ interface DonationDialogProps {
 }
 
 const DonationDialog = ({ open, onOpenChange, causeSlug, causeTitle }: DonationDialogProps) => {
+  const [amountMode, setAmountMode] = useState<AmountMode>("suggested");
   const [selectedAmount, setSelectedAmount] = useState<number>(1000);
   const [customAmount, setCustomAmount] = useState("");
   const [name, setName] = useState("");
@@ -35,7 +38,7 @@ const DonationDialog = ({ open, onOpenChange, causeSlug, causeTitle }: DonationD
   const [receipt, setReceipt] = useState<string | null>(null);
   const pollingRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  const donationAmount = customAmount ? parseInt(customAmount) : selectedAmount;
+  const donationAmount = amountMode === "custom" ? parseInt(customAmount) : selectedAmount;
 
   useEffect(() => {
     return () => {
@@ -51,6 +54,7 @@ const DonationDialog = ({ open, onOpenChange, causeSlug, causeTitle }: DonationD
     setPhone("");
     setCustomAmount("");
     setSelectedAmount(1000);
+    setAmountMode("suggested");
     if (pollingRef.current) clearInterval(pollingRef.current);
   };
 
@@ -73,12 +77,10 @@ const DonationDialog = ({ open, onOpenChange, causeSlug, causeTitle }: DonationD
 
       const checkoutId = data.checkout_request_id;
 
-      // Poll for status
       let attempts = 0;
       pollingRef.current = setInterval(async () => {
         attempts++;
         if (attempts > 40) {
-          // 2 minutes timeout
           clearInterval(pollingRef.current!);
           setPaymentState("failed");
           return;
@@ -98,7 +100,7 @@ const DonationDialog = ({ open, onOpenChange, causeSlug, causeTitle }: DonationD
             setPaymentState("failed");
           }
         } catch {
-          // Continue polling on error
+          // Continue polling
         }
       }, 3000);
     } catch (err: unknown) {
@@ -110,117 +112,246 @@ const DonationDialog = ({ open, onOpenChange, causeSlug, causeTitle }: DonationD
 
   return (
     <Dialog open={open} onOpenChange={(o) => { if (!o) resetForm(); onOpenChange(o); }}>
-      <DialogContent className="sm:max-w-md">
-        <DialogHeader>
-          <DialogTitle className="font-display text-xl flex items-center gap-2">
-            <Heart className="w-5 h-5 text-secondary" />
-            Donate to {causeTitle}
-          </DialogTitle>
-          <DialogDescription>Your donation directly supports this cause via M-Pesa.</DialogDescription>
-        </DialogHeader>
+      <DialogContent className="sm:max-w-[480px] p-0 overflow-hidden border-none shadow-2xl">
+        <div className="bg-primary px-6 py-8 text-primary-foreground relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-32 h-32 bg-secondary/10 rounded-full translate-x-1/2 -translate-y-1/2 blur-2xl" />
+          <DialogHeader className="relative z-10">
+            <div className="flex items-center gap-3 mb-2">
+              <div className="w-10 h-10 rounded-full bg-secondary/20 flex items-center justify-center">
+                <Heart className="w-5 h-5 text-secondary fill-secondary" />
+              </div>
+              <DialogTitle className="font-display text-2xl font-bold tracking-tight text-white">
+                Support our mission
+              </DialogTitle>
+            </div>
+            <DialogDescription className="text-primary-foreground/70 text-base leading-snug">
+              Your contribution to <span className="text-secondary font-semibold">{causeTitle}</span> creates lasting impact.
+            </DialogDescription>
+          </DialogHeader>
+        </div>
 
-        {paymentState === "form" && (
-          <div className="space-y-5">
-            {/* Suggested amounts */}
-            <div>
-              <Label className="text-sm font-medium mb-2 block">Select Amount (KES)</Label>
-              <div className="grid grid-cols-2 gap-2">
-                {suggestedAmounts.map((item) => (
-                  <button
-                    key={item.amount}
-                    onClick={() => { setSelectedAmount(item.amount); setCustomAmount(""); }}
-                    className={`p-3 rounded-xl text-left transition-all border ${
-                      selectedAmount === item.amount && !customAmount
-                        ? "border-secondary bg-secondary/10"
-                        : "border-border hover:border-secondary/50"
-                    }`}
+        <div className="p-6 bg-card">
+          {paymentState === "form" && (
+            <div className="space-y-6">
+              {/* Amount Selection Type */}
+              <div className="flex p-1 bg-muted rounded-xl gap-1">
+                <button
+                  onClick={() => setAmountMode("suggested")}
+                  className={`flex-1 py-2 text-sm font-bold rounded-lg transition-all ${
+                    amountMode === "suggested" ? "bg-white shadow-sm text-primary" : "text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  Give Suggested
+                </button>
+                <button
+                  onClick={() => setAmountMode("custom")}
+                  className={`flex-1 py-2 text-sm font-bold rounded-lg transition-all ${
+                    amountMode === "custom" ? "bg-white shadow-sm text-primary" : "text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  Custom Amount
+                </button>
+              </div>
+
+              <AnimatePresence mode="wait">
+                {amountMode === "suggested" ? (
+                  <motion.div
+                    key="suggested"
+                    initial={{ opacity: 0, x: -10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: 10 }}
+                    transition={{ duration: 0.2 }}
+                    className="grid grid-cols-2 gap-3"
                   >
-                    <span className="font-bold text-foreground">KES {item.amount.toLocaleString()}</span>
-                    <span className="block text-xs text-muted-foreground mt-0.5">{item.label}</span>
-                  </button>
-                ))}
+                    {suggestedAmounts.map((item) => (
+                      <button
+                        key={item.amount}
+                        onClick={() => setSelectedAmount(item.amount)}
+                        className={`p-4 rounded-xl text-left transition-all border-2 relative group overflow-hidden ${
+                          selectedAmount === item.amount
+                            ? "border-secondary bg-secondary/5 ring-4 ring-secondary/10"
+                            : "border-border hover:border-secondary/30 bg-muted/30"
+                        }`}
+                      >
+                        <div className="flex justify-between items-start mb-1">
+                          <span className="font-display font-extrabold text-lg text-foreground">
+                            {item.amount.toLocaleString()}
+                          </span>
+                          {selectedAmount === item.amount && (
+                            <div className="w-5 h-5 bg-secondary rounded-full flex items-center justify-center">
+                              <CheckCircle2 className="w-3.5 h-3.5 text-white" />
+                            </div>
+                          )}
+                        </div>
+                        <span className="block text-[10px] uppercase tracking-wider font-bold text-muted-foreground group-hover:text-secondary transition-colors">
+                          {item.label}
+                        </span>
+                      </button>
+                    ))}
+                  </motion.div>
+                ) : (
+                  <motion.div
+                    key="custom"
+                    initial={{ opacity: 0, x: 10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -10 }}
+                    transition={{ duration: 0.2 }}
+                    className="space-y-2"
+                  >
+                    <Label htmlFor="custom-amount" className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
+                      Enter Amount (KES)
+                    </Label>
+                    <div className="relative">
+                      <Coins className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+                      <Input
+                        id="custom-amount"
+                        type="number"
+                        placeholder="e.g. 5000"
+                        className="pl-12 h-14 text-xl font-bold rounded-xl border-2 focus-visible:ring-secondary focus-visible:border-secondary"
+                        value={customAmount}
+                        onChange={(e) => setCustomAmount(e.target.value)}
+                        autoFocus
+                      />
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+
+              <div className="space-y-4 pt-4 border-t border-border/50">
+                <div className="grid grid-cols-1 gap-4">
+                  <div className="space-y-1.5">
+                    <Label htmlFor="donor-name" className="text-xs font-bold uppercase tracking-widest text-muted-foreground ml-1">Full Name</Label>
+                    <Input 
+                      id="donor-name" 
+                      placeholder="Enter your name" 
+                      className="h-12 rounded-xl bg-muted/20 border-border/50"
+                      value={name} 
+                      onChange={(e) => setName(e.target.value)} 
+                    />
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-1.5">
+                      <Label htmlFor="donor-email" className="text-xs font-bold uppercase tracking-widest text-muted-foreground ml-1">Email</Label>
+                      <Input 
+                        id="donor-email" 
+                        type="email" 
+                        placeholder="your@email.com" 
+                        className="h-12 rounded-xl bg-muted/20 border-border/50"
+                        value={email} 
+                        onChange={(e) => setEmail(e.target.value)} 
+                      />
+                    </div>
+                    <div className="space-y-1.5">
+                      <Label htmlFor="donor-phone" className="text-xs font-bold uppercase tracking-widest text-muted-foreground ml-1">M-Pesa Number</Label>
+                      <Input 
+                        id="donor-phone" 
+                        type="tel" 
+                        placeholder="07XXXXXXXX" 
+                        className="h-12 rounded-xl bg-muted/20 border-border/50"
+                        value={phone} 
+                        onChange={(e) => setPhone(e.target.value)} 
+                      />
+                    </div>
+                  </div>
+                </div>
               </div>
-            </div>
 
-            <div>
-              <Label htmlFor="custom-amount">Custom Amount (KES)</Label>
-              <Input
-                id="custom-amount"
-                type="number"
-                placeholder="Enter amount"
-                value={customAmount}
-                onChange={(e) => { setCustomAmount(e.target.value); setSelectedAmount(0); }}
-              />
-            </div>
-
-            <div className="space-y-3">
-              <div>
-                <Label htmlFor="donor-name">Full Name</Label>
-                <Input id="donor-name" placeholder="John Doe" value={name} onChange={(e) => setName(e.target.value)} />
-              </div>
-              <div>
-                <Label htmlFor="donor-email">Email</Label>
-                <Input id="donor-email" type="email" placeholder="john@example.com" value={email} onChange={(e) => setEmail(e.target.value)} />
-              </div>
-              <div>
-                <Label htmlFor="donor-phone">M-Pesa Phone Number</Label>
-                <Input id="donor-phone" type="tel" placeholder="07XXXXXXXX" value={phone} onChange={(e) => setPhone(e.target.value)} />
-              </div>
-            </div>
-
-            <Button
-              onClick={handleDonate}
-              className="w-full bg-secondary text-secondary-foreground hover:opacity-90 font-semibold rounded-full"
-              disabled={!donationAmount || donationAmount < 1}
-            >
-              Donate KES {donationAmount?.toLocaleString() || "0"} via M-Pesa
-            </Button>
-          </div>
-        )}
-
-        {paymentState === "processing" && (
-          <div className="py-10 text-center space-y-4">
-            <Phone className="w-12 h-12 text-secondary mx-auto animate-pulse" />
-            <h3 className="font-display text-lg font-bold text-foreground">Check your phone</h3>
-            <p className="text-muted-foreground text-sm">
-              An M-Pesa prompt has been sent to your phone. Enter your PIN to complete the payment.
-            </p>
-            <Loader2 className="w-6 h-6 animate-spin text-secondary mx-auto" />
-            <p className="text-xs text-muted-foreground">Waiting for confirmation...</p>
-          </div>
-        )}
-
-        {paymentState === "success" && (
-          <div className="py-10 text-center space-y-4">
-            <CheckCircle2 className="w-14 h-14 text-primary mx-auto" />
-            <h3 className="font-display text-lg font-bold text-foreground">Payment Successful!</h3>
-            <p className="text-muted-foreground text-sm">
-              Thank you for your generous donation of <strong>KES {donationAmount?.toLocaleString()}</strong>.
-            </p>
-            {receipt && (
-              <p className="text-sm text-foreground">
-                M-Pesa Receipt: <strong>{receipt}</strong>
+              <Button
+                onClick={handleDonate}
+                className="w-full h-14 bg-secondary text-secondary-foreground hover:bg-secondary/90 font-bold text-lg rounded-2xl shadow-lg shadow-secondary/20 transition-all active:scale-[0.98] group"
+                disabled={!donationAmount || donationAmount < 1}
+              >
+                <div className="flex items-center justify-center gap-2">
+                  <span>Donate KES {donationAmount?.toLocaleString() || "0"}</span>
+                  <ChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                </div>
+              </Button>
+              
+              <p className="text-[10px] text-center text-muted-foreground/80 uppercase tracking-[0.2em]">
+                Secure payment powered by M-Pesa
               </p>
-            )}
-            <p className="text-xs text-muted-foreground">A receipt has been sent to your email.</p>
-            <Button onClick={() => { resetForm(); onOpenChange(false); }} variant="outline" className="rounded-full">
-              Close
-            </Button>
-          </div>
-        )}
+            </div>
+          )}
 
-        {paymentState === "failed" && (
-          <div className="py-10 text-center space-y-4">
-            <XCircle className="w-14 h-14 text-destructive mx-auto" />
-            <h3 className="font-display text-lg font-bold text-foreground">Payment Failed</h3>
-            <p className="text-muted-foreground text-sm">
-              The payment was not completed. Please try again.
-            </p>
-            <Button onClick={resetForm} className="rounded-full bg-secondary text-secondary-foreground">
-              Try Again
-            </Button>
-          </div>
-        )}
+          {paymentState === "processing" && (
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="py-12 text-center space-y-6"
+            >
+              <div className="relative inline-block">
+                <div className="absolute inset-0 bg-secondary/20 rounded-full animate-ping" />
+                <div className="relative w-20 h-20 bg-secondary/10 rounded-full flex items-center justify-center mx-auto">
+                  <Phone className="w-10 h-10 text-secondary" />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <h3 className="font-display text-2xl font-bold text-foreground">Check your phone</h3>
+                <p className="text-muted-foreground text-base max-w-[280px] mx-auto">
+                  We've sent an M-Pesa STK push to <span className="font-bold text-foreground">{phone}</span>.
+                </p>
+              </div>
+              <div className="bg-muted/50 p-4 rounded-xl flex items-center justify-center gap-3 border border-border/50">
+                <Loader2 className="w-5 h-5 animate-spin text-secondary" />
+                <span className="text-sm font-bold text-foreground uppercase tracking-widest">Waiting for PIN entry...</span>
+              </div>
+            </motion.div>
+          )}
+
+          {paymentState === "success" && (
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="py-12 text-center space-y-6"
+            >
+              <div className="w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-2">
+                <CheckCircle2 className="w-12 h-12 text-primary" />
+              </div>
+              <div className="space-y-2">
+                <h3 className="font-display text-2xl font-bold text-foreground">Asante sana!</h3>
+                <p className="text-muted-foreground text-base">
+                  Your donation of <span className="font-bold text-foreground">KES {donationAmount?.toLocaleString()}</span> has been received.
+                </p>
+              </div>
+              {receipt && (
+                <div className="inline-block px-4 py-2 bg-muted rounded-lg font-mono text-sm border border-border">
+                  Ref: <span className="font-bold">{receipt}</span>
+                </div>
+              )}
+              <div className="pt-4">
+                <Button onClick={() => { resetForm(); onOpenChange(false); }} className="rounded-xl w-full h-12 bg-primary font-bold">
+                  Continue supporting
+                </Button>
+              </div>
+            </motion.div>
+          )}
+
+          {paymentState === "failed" && (
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="py-12 text-center space-y-6"
+            >
+              <div className="w-20 h-20 bg-destructive/10 rounded-full flex items-center justify-center mx-auto mb-2">
+                <XCircle className="w-12 h-12 text-destructive" />
+              </div>
+              <div className="space-y-2">
+                <h3 className="font-display text-2xl font-bold text-foreground">Transaction Failed</h3>
+                <p className="text-muted-foreground text-base">
+                  We couldn't process your payment. Please try again.
+                </p>
+              </div>
+              <div className="pt-4 space-y-3">
+                <Button onClick={resetForm} className="rounded-xl w-full h-12 bg-secondary text-secondary-foreground font-bold">
+                  Try Again
+                </Button>
+                <Button onClick={() => onOpenChange(false)} variant="ghost" className="w-full text-muted-foreground font-bold">
+                  Close
+                </Button>
+              </div>
+            </motion.div>
+          )}
+        </div>
       </DialogContent>
     </Dialog>
   );
