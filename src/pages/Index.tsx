@@ -5,6 +5,8 @@ import ServicesStrip from "@/components/ServicesStrip";
 import AboutSection from "@/components/AboutSection";
 import StatsSection from "@/components/StatsSection";
 import ProgramsSection from "@/components/ProgramsSection";
+import EventsSection from "@/components/EventsSection";
+import BlogSection from "@/components/BlogSection";
 import CausesSection from "@/components/CausesSection";
 import CTABanner from "@/components/CTABanner";
 import PartnersSection from "@/components/PartnersSection";
@@ -21,6 +23,8 @@ const Index = () => {
         <ServicesStrip />
         <AboutSection />
         <ProgramsSection />
+        <EventsSection />
+        <BlogSection />
         <StatsSection />
         <CausesSection />
         <CTABanner />
