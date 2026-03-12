@@ -28,12 +28,18 @@ const CausesSection = () => {
   return (
     <section id="causes" className="py-24 bg-background">
       <div className="container">
-        <div className="text-center mb-16">
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, amount: 0.2 }}
+          transition={{ duration: 0.7 }}
+          className="text-center mb-16"
+        >
           <p className="text-secondary font-semibold mb-2">Our Causes</p>
           <h2 className="text-4xl md:text-5xl font-display font-bold text-foreground">
             Find popular causes
           </h2>
-        </div>
+        </motion.div>
 
         <div className="grid md:grid-cols-3 gap-8">
           {displayCauses.map((cause, i) => {
@@ -43,7 +49,7 @@ const CausesSection = () => {
                 key={cause.slug}
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
+                viewport={{ once: true, amount: 0.2 }}
                 transition={{ delay: i * 0.15, duration: 0.5 }}
                 className="bg-card rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-shadow group"
               >
@@ -51,6 +57,8 @@ const CausesSection = () => {
                   <img
                     src={causeImages[cause.slug] || cause1}
                     alt={cause.title}
+                    loading="lazy"
+                    decoding="async"
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                   />
                   <span className="absolute top-4 left-4 bg-secondary text-secondary-foreground text-xs font-semibold px-3 py-1 rounded-full">
